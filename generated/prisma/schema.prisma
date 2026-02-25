@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Declering ENUMS
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum Role {
+  SUPER_ADMIN
+  BUSINESS_ADMIN
+  STAFF
+  CUSTOMER
+}
+
+enum BusinesStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum QueueStatus {
+  OPEN
+  PAUSE // Staff is on break. Tokens still generate, but serving is temporarily stopped.
+  LOCKED // stop generating new tokens, already tokens have reached to maximum number for serving
+  CLOSED //End of the day , no one can generate tokens and no one is serving
+}
+
+enum TokenState {
+  WAITING
+  CALLED
+  SERVING
+  COMPLETED
+  SKIPPED
+  PRIORITY
+  CANCELLED
+  EXPIRED
+}
+
+// MODELS
+
+model User {
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(50)
+  email     String     @unique @db.VarChar(100)
+  password  String     @db.VarChar(255)
+  userRole  Role       @default(CUSTOMER)
+  status    UserStatus @default(PENDING)
+  createdAt DateTime   @default(now())
+
+  businesses   Business[]
+  managedQueue QueueManager[]
+  token        Token[]
+
+  @@map("users")
+}
+
+model Business {
+  id        Int           @id @default(autoincrement())
+  name      String        @db.VarChar(50)
+  status    BusinesStatus @default(PENDING)
+  ownerId   Int
+  createdAT DateTime      @default(now())
+
+  owner User @relation(fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  queues Queue[]
+  tokens Token[]
+
+  @@map("businesses")
+}
+
+model Queue {
+  id                 Int       @id @default(autoincrement())
+  name               String    @db.VarChar(40)
+  businessId         Int
+  defaultServiceTime Int
+  lastPausedAt       DateTime? @db.Timestamptz()
+  totalPausedTime    Int       @default(0)
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  business Business       @relation(fields: [businessId], references: [id])
+  managers QueueManager[]
+  token    Token[]
+
+  @@map("queues")
+}
+
+model QueueManager {
+  userId  Int
+  queueId Int
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  queue Queue @relation(fields: [queueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  //composite primary key
+  @@id([userId, queueId])
+  @@map("queue_manager")
+}
+
+model Token {
+  id             Int        @id @default(autoincrement())
+  queueId        Int
+  businessId     Int
+  userId         Int
+  sequenceNumber Int
+  state          TokenState @default(WAITING)
+  calledAt       DateTime?  @db.Timestamptz()
+  servedAt       DateTime?  @db.Timestamptz()
+  completedAt    DateTime?  @db.Timestamptz()
+
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+
+  queue    Queue    @relation(fields: [queueId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("tokens")
+}
