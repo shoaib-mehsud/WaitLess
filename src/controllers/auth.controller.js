@@ -1,6 +1,6 @@
-import { signup } from "../services/auth.services.js";
+import { signup,signin } from "../services/auth.services.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { signupValidator } from "../validator/auth.validator.js";
+import { signupValidator,signinValidator } from "../validator/auth.validator.js";
 
 export const signupCont = asyncHandler(async(req,res)=>{
 
@@ -13,4 +13,16 @@ export const signupCont = asyncHandler(async(req,res)=>{
         data: newUser
     })
 
+})
+
+export const signinCont = asyncHandler(async(req,res)=>{
+
+    const validatedData = signinValidator.parse(req.body);
+    const userToSignin = await signin(validatedData);
+     res.status(201).json({
+        success: true,
+        message: "Login successfully.",
+        data: userToSignin
+    })
+    
 })

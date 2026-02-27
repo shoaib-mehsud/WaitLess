@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { prisma } from '../config/db.js';
 
 
@@ -34,4 +34,33 @@ export async function signup(userData) {
     });
 
     return newUser;
+}
+
+export async function signin(userCredential) {
+
+    const { email, password } = userCredential;
+
+    const user = await prisma.user.findUnique({
+        where: { email }
+    });
+
+    if(!user){
+        const error = new Error ("Invalid Email");
+        error.statusCode = 401;
+        throw error;
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password,user.password);
+    if(!isPasswordCorrect){
+        const error = new Error ("Invalid Password");
+        error.statusCode = 401;
+        throw error;
+    }
+    return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    userRole: user.userRole,
+    createdAt: user.createdAt
+  };
 }
