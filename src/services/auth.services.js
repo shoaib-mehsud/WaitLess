@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../config/db.js';
-
+import jwt from 'jsonwebtoken'
 
 
 export async function signup(userData) {
@@ -56,11 +56,13 @@ export async function signin(userCredential) {
         error.statusCode = 401;
         throw error;
     }
+
+    const { password: _, ...safeUser } = user;
+  
+    const token = jwt.sign({id: user.id,role: user.userRole},process.env.JWT_SECRET,{expiresIn: "1d"});
+    
     return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    userRole: user.userRole,
-    createdAt: user.createdAt
-  };
+        user: safeUser,
+        token
+    };
 }
