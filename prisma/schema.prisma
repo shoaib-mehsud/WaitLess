@@ -23,7 +23,7 @@ enum Role {
     CUSTOMER
 }
 
-enum BusinesStatus {
+enum BusinessStatus {
     PENDING
     APPROVED
     REJECTED
@@ -32,7 +32,7 @@ enum BusinesStatus {
 
 enum QueueStatus {
     OPEN
-    PAUSE // Staff is on break. Tokens still generate, but serving is temporarily stopped.
+    PAUSED // Staff is on break. Tokens still generate, but serving is temporarily stopped.
     LOCKED // stop generating new tokens, already tokens have reached to maximum number for serving
     CLOSED //End of the day , no one can generate tokens and no one is serving
 }
@@ -70,7 +70,7 @@ model User {
 model Business {
     id Int @default(autoincrement()) @id
     name String @db.VarChar(50)
-    status BusinesStatus @default(PENDING)
+    status BusinessStatus @default(PENDING)
     ownerId Int 
     createdAT DateTime  @default(now())
 
@@ -89,7 +89,7 @@ model Queue {
     defaultServiceTime Int
     lastPausedAt DateTime? @db.Timestamptz()
     totalPausedTime Int @default(0)
-
+    state QueueStatus @default(OPEN)
     createdAt DateTime @default(now()) @db.Timestamptz()
     updatedAt DateTime @updatedAt @db.Timestamptz()
 
@@ -128,6 +128,7 @@ model Token {
 
     queue Queue @relation(fields: [queueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
     business Business @relation(fields: [businessId],references: [id],onDelete: Cascade, onUpdate: Cascade)
-    @@map("tokens")
+    @@unique([queueId, sequenceNumber])
     user User @relation(fields: [userId],references: [id],onDelete: Cascade,onUpdate:Cascade)
+    @@map("tokens")
 }
