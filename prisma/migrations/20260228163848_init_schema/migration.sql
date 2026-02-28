@@ -5,13 +5,16 @@ CREATE TYPE "UserStatus" AS ENUM ('PENDING', 'ACTIVE', 'SUSPENDED');
 CREATE TYPE "Role" AS ENUM ('SUPER_ADMIN', 'BUSINESS_ADMIN', 'STAFF', 'CUSTOMER');
 
 -- CreateEnum
-CREATE TYPE "BusinesStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED');
+CREATE TYPE "BusinessStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED');
 
 -- CreateEnum
 CREATE TYPE "QueueStatus" AS ENUM ('OPEN', 'PAUSE', 'LOCKED', 'CLOSED');
 
 -- CreateEnum
 CREATE TYPE "TokenState" AS ENUM ('WAITING', 'CALLED', 'SERVING', 'COMPLETED', 'SKIPPED', 'PRIORITY', 'CANCELLED', 'EXPIRED');
+
+-- CreateEnum
+CREATE TYPE "BusinesStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -43,10 +46,10 @@ CREATE TABLE "queues" (
     "name" VARCHAR(40) NOT NULL,
     "businessId" INTEGER NOT NULL,
     "defaultServiceTime" INTEGER NOT NULL,
-    "lastPausedAt" TIMESTAMPTZ,
+    "lastPausedAt" TIMESTAMPTZ(6),
     "totalPausedTime" INTEGER NOT NULL DEFAULT 0,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMPTZ NOT NULL,
+    "createdAt" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ(6) NOT NULL,
 
     CONSTRAINT "queues_pkey" PRIMARY KEY ("id")
 );
@@ -67,11 +70,11 @@ CREATE TABLE "tokens" (
     "userId" INTEGER NOT NULL,
     "sequenceNumber" INTEGER NOT NULL,
     "state" "TokenState" NOT NULL DEFAULT 'WAITING',
-    "calledAt" TIMESTAMPTZ,
-    "servedAt" TIMESTAMPTZ,
-    "completedAt" TIMESTAMPTZ,
-    "createdAt" TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMPTZ NOT NULL,
+    "calledAt" TIMESTAMPTZ(6),
+    "servedAt" TIMESTAMPTZ(6),
+    "completedAt" TIMESTAMPTZ(6),
+    "createdAt" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMPTZ(6) NOT NULL,
 
     CONSTRAINT "tokens_pkey" PRIMARY KEY ("id")
 );
@@ -86,16 +89,16 @@ ALTER TABLE "businesses" ADD CONSTRAINT "businesses_ownerId_fkey" FOREIGN KEY ("
 ALTER TABLE "queues" ADD CONSTRAINT "queues_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "businesses"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "queue_manager" ADD CONSTRAINT "queue_manager_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "queue_manager" ADD CONSTRAINT "queue_manager_queueId_fkey" FOREIGN KEY ("queueId") REFERENCES "queues"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "tokens" ADD CONSTRAINT "tokens_queueId_fkey" FOREIGN KEY ("queueId") REFERENCES "queues"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "queue_manager" ADD CONSTRAINT "queue_manager_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tokens" ADD CONSTRAINT "tokens_businessId_fkey" FOREIGN KEY ("businessId") REFERENCES "businesses"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "tokens" ADD CONSTRAINT "tokens_queueId_fkey" FOREIGN KEY ("queueId") REFERENCES "queues"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "tokens" ADD CONSTRAINT "tokens_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

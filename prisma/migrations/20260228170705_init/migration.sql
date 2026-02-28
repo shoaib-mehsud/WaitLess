@@ -6,9 +6,6 @@
   - A unique constraint covering the columns `[queueId,sequenceNumber]` on the table `tokens` will be added. If there are existing duplicate values, this will fail.
 
 */
--- CreateEnum
-CREATE TYPE "BusinessStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'SUSPENDED');
-
 -- AlterEnum
 BEGIN;
 CREATE TYPE "QueueStatus_new" AS ENUM ('OPEN', 'PAUSED', 'LOCKED', 'CLOSED');

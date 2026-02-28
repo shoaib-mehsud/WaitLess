@@ -1,10 +1,11 @@
 import express from 'express';
 import { prisma } from './config/db.js';
 import authRouter from './routes/auth.routes.js';
-
+import businessRouter from './routes/business.routes.js';
 const app = express();
 app.use(express.json());
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/business',businessRouter);
 
 const startServer = async () => {
   try {

@@ -50,68 +50,6 @@ enum TokenState {
 
 // MODELS
 
-model User {
-    id  Int @default(autoincrement()) @id
-    name String @db.VarChar(50)
-    email String @db.VarChar(100) @unique
-    password String @db.VarChar(255)
-    userRole Role @default(CUSTOMER)
-    status UserStatus @default(PENDING)
-    createdAt DateTime @default(now())
-    
-    businesses Business[]
-    managedQueue QueueManager[]
-    token Token[]
-
-    @@map("users")
-
-}
-
-model Business {
-    id Int @default(autoincrement()) @id
-    name String @db.VarChar(50)
-    status BusinessStatus @default(PENDING)
-    ownerId Int 
-    createdAT DateTime  @default(now())
-
-    owner User @relation(fields: [ownerId], references: [id],onDelete: Cascade,onUpdate: Cascade)
-
-    queues Queue[]
-    tokens Token[]
-
-    @@map("businesses")
-}
-
-model Queue {
-    id Int @default(autoincrement()) @id
-    name String @db.VarChar(40)
-    businessId Int
-    defaultServiceTime Int
-    lastPausedAt DateTime? @db.Timestamptz()
-    totalPausedTime Int @default(0)
-    state QueueStatus @default(OPEN)
-    createdAt DateTime @default(now()) @db.Timestamptz()
-    updatedAt DateTime @updatedAt @db.Timestamptz()
-
-    business Business @relation(fields: [businessId],references: [id])
-    managers QueueManager[]
-    token Token[]
-    @@map("queues")
-
-}
-
-model QueueManager {
-    userId Int
-    queueId Int
-
-    user User @relation(fields: [userId],references: [id],onDelete:Cascade,onUpdate: Cascade)
-    queue Queue @relation(fields: [ queueId],references: [id],onDelete: Cascade, onUpdate: Cascade)
-
-    //composite primary key
-    @@id([userId,queueId])
-    @@map("queue_manager")
-}
-
 model Token {
     id Int @default(autoincrement()) @id
     queueId Int
