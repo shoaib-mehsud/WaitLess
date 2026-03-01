@@ -28,3 +28,23 @@ export const getBusiness = asyncHandler(async(req,res)=>{
     })
 
 })
+
+export const updateBusiness = asyncHandler(async(req,res)=>{
+    const header = parseInt(req.params.id);
+
+    const allowedFields = ["name"];
+    const fieldsToUpdate = {};
+    Object.keys(req.body).forEach((key)=>{
+        if(allowedFields.includes(key)){
+            fieldsToUpdate[key] = req.body[key];
+        }
+    });
+    const validatedData = businessValidator.updateValidator.parse(fieldsToUpdate);
+
+    const updateBusiness = await bussinessServices.updateBusiness(header,validatedData);
+    res.json({
+        message: "Business updated successfully",
+        course: updateBusiness
+    })
+
+})

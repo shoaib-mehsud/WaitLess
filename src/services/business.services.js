@@ -42,3 +42,18 @@ export async function getBusiness(data){
     return businessDetail;
 
 }
+
+export async function updateBusiness(id,data){
+    const updated = prisma.business.update({
+        where: {id},
+        data: {
+            name: data.name
+        },
+        select: {
+            name: true, 
+            createdAT: true,
+        }
+    });
+    return updated;
+
+}
