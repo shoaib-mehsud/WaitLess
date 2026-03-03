@@ -1,4 +1,3 @@
-import { da } from "zod/v4/locales";
 import { prisma } from "../config/db.js";
 
 
@@ -56,4 +55,11 @@ export async function updateBusiness(id,data){
     });
     return updated;
 
+}
+
+export async function deleteBusiness(id) {
+    const deletedBusiness = await prisma.business.delete({
+        where: {id: Number(id)}
+    });
+    return deletedBusiness;
 }

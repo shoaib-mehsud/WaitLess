@@ -1,11 +1,12 @@
 import express from "express";
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import {  createBusiness,getBusiness,updateBusiness  } from '../controllers/business.controller.js'
+import * as businessController from '../controllers/business.controller.js'
 
 
 const businessRouter = express.Router();
-businessRouter.post('/',verifyJWT,createBusiness);
-businessRouter.get('/:id',getBusiness);
-businessRouter.patch('/:id',verifyJWT,updateBusiness)
+businessRouter.post('/',verifyJWT,businessController.createBusiness);
+businessRouter.get('/:id',businessController.getBusiness);
+businessRouter.patch('/:id',verifyJWT,businessController.updateBusiness)
+businessRouter.delete('/:id', verifyJWT, businessController.deleteBusiness);
 
 export default businessRouter;
