@@ -119,7 +119,7 @@ model Token {
     queueId Int
     businessId  Int
     userId Int 
-    sequenceNumber Int
+    ticketCode String
     state TokenState @default(WAITING)
     calledAt DateTime? @db.Timestamptz()
     servedAt DateTime? @db.Timestamptz()
@@ -130,7 +130,7 @@ model Token {
 
     queue Queue @relation(fields: [queueId],references: [id],onDelete: Cascade,onUpdate: Cascade)
     business Business @relation(fields: [businessId],references: [id],onDelete: Cascade, onUpdate: Cascade)
-    @@unique([queueId, sequenceNumber])
+    @@unique([queueId, ticketCode])
     user User @relation(fields: [userId],references: [id],onDelete: Cascade,onUpdate:Cascade)
     @@map("tokens")
 }
