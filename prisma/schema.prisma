@@ -119,7 +119,7 @@ model Token {
     queueId Int
     businessId  Int
     userId Int 
-    ticketCode String
+    ticketCode Int
     state TokenState @default(WAITING)
     calledAt DateTime? @db.Timestamptz()
     servedAt DateTime? @db.Timestamptz()

@@ -3,3 +3,4 @@
 backend/generated
 generated/
 node_modules/
+**/src/stress-test

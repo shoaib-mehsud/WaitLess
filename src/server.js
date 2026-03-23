@@ -3,11 +3,16 @@ import { prisma } from './config/db.js';
 import authRouter from './routes/auth.routes.js';
 import businessRouter from './routes/business.routes.js';
 import queueRouter from './routes/queue.routes.js';
+import tokenRouter from './routes/token.routes.js';
+
+
 const app = express();
 app.use(express.json());
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/business',businessRouter);
 app.use('/api/v1/queue',queueRouter);
+app.use('/api/v1/token',tokenRouter);
+
 
 const startServer = async () => {
   try {
