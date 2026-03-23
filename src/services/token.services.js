@@ -56,3 +56,28 @@ export async function joinQueue(queueId, userId) {
     return newToken;
   })
 }
+
+export async function getQueueTokens(queueId) {
+  return await prisma.token.findMany({
+    where: {
+      queueId: Number(queueId),
+      state: {
+        in: ['WAITING', 'CALLED']
+      }
+    },
+    select: {
+      id: true,
+      ticketCode: true,
+      state: true,
+      user: {
+        select: {
+          name: true 
+        }
+      }
+    },
+    
+    orderBy: {
+      ticketCode: 'asc'
+    }
+  });
+}

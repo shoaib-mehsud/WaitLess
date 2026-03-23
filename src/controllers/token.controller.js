@@ -1,6 +1,8 @@
+import { success } from "zod";
 import * as tokenServices from "../services/token.services.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { joinQueueValidator } from "../validator/token.validator.js";
+import { tr } from "zod/v4/locales";
 
 export const joinQueueController = asyncHandler(async(req,res)=>{
 
@@ -23,5 +25,16 @@ export const joinQueueController = asyncHandler(async(req,res)=>{
     });
 
 
+
+})
+
+export const getTokenController = asyncHandler(async(req,res)=>{
+    const rawId = req.params.queueId;
+    const parsed = joinQueueValidator.parse({queueId: rawId});
+    const tokens = await tokenServices.getQueueTokens(parsed.queueId);
+    res.status(201).json({
+        success: true,
+        Queue: tokens
+    })
 
 })
