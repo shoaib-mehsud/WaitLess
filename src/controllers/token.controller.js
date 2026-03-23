@@ -38,3 +38,13 @@ export const getTokenController = asyncHandler(async(req,res)=>{
     })
 
 })
+
+export const callNextTokenController = asyncHandler(async(req,res)=>{
+    const rawId = req.params.queueId;
+    const parsed = joinQueueValidator.parse({queueId: rawId});
+    const tokenUpdated = await tokenServices.callNextToken(parsed.queueId);
+    res.status(201).json({
+        success: true,
+        data: tokenUpdated
+    })
+})

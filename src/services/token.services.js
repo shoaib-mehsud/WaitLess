@@ -81,3 +81,55 @@ export async function getQueueTokens(queueId) {
     }
   });
 }
+
+
+export async function callNextToken(queueId){
+
+  return await prisma.$transaction(async(tx)=>{
+
+    // locks the queue row, so that it remain consistent under multiple request at same time 
+    const queueResult = await tx.$queryRaw`
+    SELECT "id" FROM "queues"
+    WHERE id = ${queueId}
+    FOR UPDATE
+    `
+   
+    const tokenToUpdate = await tx.token.findFirst({
+      where: {
+        queueId: Number(queueId),
+        state: 'WAITING'
+      },
+      orderBy: {ticketCode: 'asc'}
+    });
+
+     if(!tokenToUpdate ){
+      throw new Error ("Tickets not Found")
+    }
+
+    const updatedToken = await tx.token.update({
+      where: {
+        id: tokenToUpdate.id
+      },
+      data: {
+        state: 'CALLED',
+        calledAt: new Date()
+      },
+      select: {
+        id: true,
+        ticketCode: true,
+        state: true,
+        user:{
+          select: {
+            name: true
+          }
+        }
+      }
+    });
+
+    
+return updatedToken
+  }
+
+)
+
+}
