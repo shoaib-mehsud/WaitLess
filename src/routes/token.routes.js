@@ -8,6 +8,8 @@ const tokenRouter = express.Router();
 tokenRouter.post('/join/:queueId',verifyJWT,tokenController.joinQueueController)
 tokenRouter.get('/queue/:queueId',verifyJWT,tokenController.getTokenController)
 tokenRouter.patch('/call/:queueId',verifyJWT,tokenController.callNextTokenController)
+tokenRouter.patch('/serve/:queueId',verifyJWT,tokenController.serveCurentTokenController)
+
 
 
 

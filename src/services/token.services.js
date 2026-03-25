@@ -93,6 +93,19 @@ export async function callNextToken(queueId){
     WHERE id = ${queueId}
     FOR UPDATE
     `
+    // Checks if any token already in CALLED state, i yes and the manager call 
+    // this function callNextToken will throw an error that one user is already CALLED
+
+    const checkTokenAlreadyCalled = await tx.token.findFirst({
+      where: {
+        queueId: Number(queueId),
+        state: 'CALLED'
+      }
+    });
+
+    if(checkTokenAlreadyCalled){
+      throw new Error ("one user is already in CALLED state")
+    }
    
     const tokenToUpdate = await tx.token.findFirst({
       where: {
@@ -132,4 +145,51 @@ return updatedToken
 
 )
 
+}
+
+export async function serveCurentToken(queueId){
+
+  const isAnyTokenInCalledState =  await prisma.token.findFirst({
+    where: {queueId: queueId,
+            state: 'CALLED'
+    }
+  });
+   
+  if(!isAnyTokenInCalledState){
+    throw new Error ("No one is called to server")
+  }
+
+  // Checks if any token already in SERVING state, iF yes and the manager call it
+    // so it will throw an error that one user is already SERVING
+
+    const checkTokenAlreadySrving = await prisma.token.findFirst({
+      where: {
+        queueId: Number(queueId),
+        state: 'SERVING'
+      }
+    });
+
+    if(checkTokenAlreadySrving){
+      throw new Error ("one user is already in SERVING state, 2 user canot be serve at single time")
+    }
+  const tokenToServe = await prisma.token.update({
+    where: {
+      id: isAnyTokenInCalledState.id
+    },
+    data: {
+      state: 'SERVING',
+      servedAt: new Date()
+    },
+    select:{
+      id: true,
+      ticketCode: true,
+      state: true,
+      user: {
+        select: {
+          name: true
+        }
+      }
+    }
+  })
+  return tokenToServe;
 }

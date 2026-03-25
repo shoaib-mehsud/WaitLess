@@ -1,6 +1,5 @@
-const YOUR_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6IkNVU1RPTUVSIiwiaWF0IjoxNzc0MjUwODc1LCJleHAiOjE3NzQzMzcyNzV9.HcJfS9F6wjS9wEkrGWR3casZXR10PPPScVtTGren9a0"; // <-- Put your real token here
-const QUEUE_ID = 2; // <-- Use the queue ID you are testing
-
+const YOUR_JWT = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6IkNVU1RPTUVSIiwiaWF0IjoxNzc0MzczNTM0LCJleHAiOjE3NzQ0NTk5MzR9.SUKDSCyvIlNfoGneSuR7XUvkgIkztzZkfk4OmN1BV1Y"; // <-- Put your real token here
+const QUEUE_ID = 1; 
 async function fireRequests() {
     console.log("Firing 10 concurrent requests to the WaitLess server...");
     
