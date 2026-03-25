@@ -1,8 +1,6 @@
-import { date, success } from "zod";
 import * as tokenServices from "../services/token.services.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { joinQueueValidator } from "../validator/token.validator.js";
-import { tr } from "zod/v4/locales";
+import { joinQueueValidator,serveSpecificTokenValidator } from "../validator/token.validator.js";
 
 export const joinQueueController = asyncHandler(async(req,res)=>{
 
@@ -64,6 +62,30 @@ export const completeTokenController = asyncHandler(async(req,res)=>{
     const rawId  = req.params.queueId;
     const parsed = joinQueueValidator.parse({queueId: rawId});
     const tokenIsCompleted = await tokenServices.completeToken(parsed.queueId);
+    res.status(201).json({
+        success: true,
+        data: tokenIsCompleted
+    })
+})
+
+
+export const holdSpecificTokenController = asyncHandler(async(req,res)=>{
+
+    const rawData  = req.params;
+    const parsed = serveSpecificTokenValidator.parse(rawData);
+    const {queueId,tokenId} = parsed;
+    const tokenHeld = await tokenServices.holdSpecificToken(queueId,tokenId);
+    res.status(201).json({
+        success: true,
+        data: tokenHeld
+    })
+})
+export const serveSpecificTokenController = asyncHandler(async(req,res)=>{
+
+    const rawData  = req.params;
+    const parsed = serveSpecificTokenValidator.parse(rawData);
+    const {queueId,tokenId} = parsed;
+    const tokenIsCompleted = await tokenServices.serveSpecificToken(queueId,tokenId);
     res.status(201).json({
         success: true,
         data: tokenIsCompleted

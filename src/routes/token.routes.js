@@ -10,6 +10,8 @@ tokenRouter.get('/queue/:queueId',verifyJWT,tokenController.getTokenController)
 tokenRouter.patch('/call/:queueId',verifyJWT,tokenController.callNextTokenController)
 tokenRouter.patch('/serve/:queueId',verifyJWT,tokenController.serveCurentTokenController)
 tokenRouter.patch('/complete/:queueId',verifyJWT,tokenController.completeTokenController)
+tokenRouter.patch('/:queueId/hold/:tokenId',verifyJWT,tokenController.holdSpecificTokenController)
+tokenRouter.patch('/:queueId/serve-priority/:tokenId',verifyJWT,tokenController.serveSpecificTokenController)
 
 
 

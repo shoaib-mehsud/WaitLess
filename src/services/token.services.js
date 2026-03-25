@@ -231,3 +231,93 @@ export async function completeToken(queueId){
   return tokenCompleted;
 
 }
+
+
+export async function holdSpecificToken(queueId,tokenId) {
+  
+
+  const targetToken = await prisma.token.findFirst({
+    where: {
+      id: tokenId,
+      queueId: queueId
+    }
+  });
+
+  if(!targetToken){
+    throw new Error ("Queue or Token doesnot exist");
+  }
+
+  // state Validation
+  if (targetToken.state !== 'CALLED' && targetToken.state !== 'SERVING') {
+    throw new Error(`Cannot put ticket on hold. Current state is ${targetToken.state}.`);
+  }
+
+  //Update the state
+  // if the user was SERVING, and then we change its state to PRIORITY --> then the servedAt time calculated will be wiped out, by declaring isServing null
+  //but if they were moved from CALLED to PRIORITY ,       * We explicitly pass `targetToken.servedAt` to preserve whatever value is currently in the DB  and for CALLED its already null or zero
+
+  const isServing = targetToken.state === 'SERVING';
+  const tokenOnHold = await prisma.token.update({
+    where: {
+      id: tokenId
+    },
+    data: {
+      state: 'PRIORITY',
+      servedAt: isServing? null : targetToken.servedAt
+    }
+  });
+  return tokenOnHold
+}
+
+
+export async function serveSpecificToken(queueId,tokenId) {
+  
+
+    const checkAnotherTokenAlreadyServing = await prisma.token.findFirst({
+      where: {
+        queueId: queueId,
+        state: 'SERVING'
+            }
+    });
+
+    if (checkAnotherTokenAlreadyServing) {
+        throw new Error(`Cannot serve now. Ticket ${checkAnotherTokenAlreadyServing.ticketCode} is currently Serving.`);
+      }
+
+      //  Does the token exist
+      const targetToken = await prisma.token.findUnique({
+        where: { id: tokenId }
+      });
+
+      // state Validation
+      if (!targetToken) {
+        throw new Error("Invalid Token ID. Token not found.");
+      }
+
+      if (targetToken.state !== 'PRIORITY') {
+      throw new Error(`Can only serve users from PRIORITY hold. This user is currently ${targetToken.state}.`);
+      }
+
+    // Update the state of token
+    const specificTokenToServe = await prisma.token.update({
+      where: {
+        id: tokenId,
+        // state: 'PRIORITY'
+      },
+      data: {
+      state: 'SERVING',
+      servedAt: new Date()
+    },
+    select:{
+      id: true,
+      ticketCode: true,
+      state: true,
+      user: {
+        select: {
+          name: true
+        }
+      }
+    }
+    });
+    return specificTokenToServe;
+}
