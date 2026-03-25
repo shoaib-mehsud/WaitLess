@@ -193,3 +193,41 @@ export async function serveCurentToken(queueId){
   })
   return tokenToServe;
 }
+
+export async function completeToken(queueId){
+
+  const isAnyTokenInServingState = await prisma.token.findFirst({
+    where: {
+      queueId: queueId,
+      state: 'SERVING'
+    }
+  });
+
+    if(!isAnyTokenInServingState){
+    throw new Error ("Their is no active appointment to complete")
+  }
+
+
+  const tokenCompleted = await prisma.token.update({
+    where: {
+      id: isAnyTokenInServingState.id 
+    },
+    data: {
+      state: 'COMPLETED',
+      completedAt: new Date()
+    },
+    select: {
+      id: true,
+      ticketCode: true,
+      state: true,
+      user: {
+        select: {
+          name: true
+        }
+      }
+    }
+  });
+
+  return tokenCompleted;
+
+}

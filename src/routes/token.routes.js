@@ -9,7 +9,7 @@ tokenRouter.post('/join/:queueId',verifyJWT,tokenController.joinQueueController)
 tokenRouter.get('/queue/:queueId',verifyJWT,tokenController.getTokenController)
 tokenRouter.patch('/call/:queueId',verifyJWT,tokenController.callNextTokenController)
 tokenRouter.patch('/serve/:queueId',verifyJWT,tokenController.serveCurentTokenController)
-
+tokenRouter.patch('/complete/:queueId',verifyJWT,tokenController.completeTokenController)
 
 
 

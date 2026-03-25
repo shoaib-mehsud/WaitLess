@@ -58,3 +58,14 @@ export const serveCurentTokenController  = asyncHandler(async(req,res)=>{
         data: tokenServing
     })
 })
+
+export const completeTokenController = asyncHandler(async(req,res)=>{
+
+    const rawId  = req.params.queueId;
+    const parsed = joinQueueValidator.parse({queueId: rawId});
+    const tokenIsCompleted = await tokenServices.completeToken(parsed.queueId);
+    res.status(201).json({
+        success: true,
+        data: tokenIsCompleted
+    })
+})
