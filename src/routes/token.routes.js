@@ -12,6 +12,7 @@ tokenRouter.patch('/serve/:queueId',verifyJWT,tokenController.serveCurentTokenCo
 tokenRouter.patch('/complete/:queueId',verifyJWT,tokenController.completeTokenController)
 tokenRouter.patch('/:queueId/hold/:tokenId',verifyJWT,tokenController.holdSpecificTokenController)
 tokenRouter.patch('/:queueId/serve-priority/:tokenId',verifyJWT,tokenController.serveSpecificTokenController)
+tokenRouter.patch('/:userId/cancel-token/:tokenId/:queueId',verifyJWT,tokenController.canelTokenController)
 
 
 

@@ -1,6 +1,7 @@
+import { success } from "zod";
 import * as tokenServices from "../services/token.services.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { joinQueueValidator,serveSpecificTokenValidator } from "../validator/token.validator.js";
+import { joinQueueValidator,serveSpecificTokenValidator,cancelTokenValidator } from "../validator/token.validator.js";
 
 export const joinQueueController = asyncHandler(async(req,res)=>{
 
@@ -90,4 +91,19 @@ export const serveSpecificTokenController = asyncHandler(async(req,res)=>{
         success: true,
         data: tokenIsCompleted
     })
+})
+
+export const canelTokenController = asyncHandler(async(req,res)=>{
+
+    const rawData = req.params;
+    const parsed = cancelTokenValidator.parse(rawData);
+    const {userId,tokenId,queueId} = parsed;
+    console.log('-----------',parsed)
+
+    const tokenCancelled = await tokenServices.cancelToken(userId,tokenId,queueId);
+    res.status(201).json({
+        success: true,
+        data: tokenCancelled
+    });
+
 })

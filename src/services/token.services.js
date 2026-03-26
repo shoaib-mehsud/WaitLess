@@ -1,3 +1,4 @@
+import { tr } from 'zod/v4/locales';
 import { prisma } from '../config/db.js';
 
 export async function joinQueue(queueId, userId) {
@@ -320,4 +321,77 @@ export async function serveSpecificToken(queueId,tokenId) {
     }
     });
     return specificTokenToServe;
+}
+
+export async function cancelToken(userId,tokenId,queueId){
+
+  //Fetch the token and check, if not just throw an error earlier 
+  // We include the business owner so we can check it later that this queue belongs to that bisiness owner without extra queries
+  const targetToken = await prisma.token.findFirst({
+    where: {
+      queueId: queueId,
+      id: tokenId,
+    },
+    include: {
+      business: {
+        select :{
+          ownerId: true
+        }
+      }
+    }
+  });
+
+  if(!targetToken){
+    throw new Error ("Invalid Token ID. Token not found");
+  }
+
+  // STATE validation
+  const allowedStates = ['WAITING', 'CALLED'];
+
+  if (!allowedStates.includes(targetToken.state)) {
+  throw new Error(`Cannot cancel the ticket. Current state is ${targetToken.state}`);
+  }
+  //Authorization Check
+
+  let isAuthorized = false;
+
+  if(targetToken.userId === userId ){
+    isAuthorized = true;
+  }
+  else if (targetToken.business.ownerId === userId){
+    isAuthorized = true
+  }
+  else {
+    const isManagerHasControl = await prisma.queueManager.findUnique({
+    where: {
+      userId_queueId:{
+        userId: userId,
+        queueId: queueId
+      }
+    }
+    });
+    if (isManagerHasControl) isAuthorized = true;
+  }
+
+  //Throw an error for UNAUTHORIZED users
+  if (!isAuthorized) {
+    throw new Error("Forbidden: You do not have permission to cancel this ticket.");
+
+  }
+  // The change of state to CANCELLED
+  const cancelledToken = await prisma.token.update({
+    where: {
+      id: tokenId
+    },
+    data: {
+      state: 'CANCELLED'
+    },
+    select: {
+      id: true,
+      ticketCode: true,
+      state: true
+    }
+  });
+  return cancelledToken
+
 }
