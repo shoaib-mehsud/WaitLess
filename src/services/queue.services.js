@@ -20,14 +20,52 @@ export async function fetchQueuesByBusiness(businessId){
 }
 
 // changes the  queue state 
-export async function modifyQueueStatus(id,newState) {
+export async function modifyQueueStatus(id,status) {
     
-    return await prisma.queue.update({
-        where: {id},
-        data: {
-            state: newState
-        }
+    const queueId = id;
+    const newState = status
+    const queue =  await prisma.queue.findUnique({
+        where: {id: queueId},
     });
+
+    if(!queue){
+        throw new Error("Queue not found")
+    };
+
+    // to prevent hitting database if stata is not changing
+    if(queue.state === newState){
+        return queue
+    }
+    // payload build
+    const updateData = {
+        state: newState
+    }
+
+    if(newState === 'PAUSED'){
+        updateData.lastPausedAt = new Date();
+    }
+
+    else if (queue.state === 'PAUSED' && queue.lastPausedAt){
+
+        const now = new Date();
+
+        const totalDiffInMilliSec = now.getTime() - queue.lastPausedAt.getTime();
+        const totalDiffInSec = Math.floor(totalDiffInMilliSec/1000);
+
+        updateData.totalPausedTime = queue.totalPausedTime + totalDiffInSec;
+        updateData.lastPausedAt = null;
+    };
+
+    const updateQueue = prisma.queue.update({
+        where: {
+            id: queueId
+        },
+        data: updateData
+    });
+
+    return updateQueue;
+
+
 }
 
 // deleting a queue

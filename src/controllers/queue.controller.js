@@ -30,7 +30,7 @@ export const getBusinessQueues = asyncHandler(async(req, res) => {
 export const updateQueueStatus = asyncHandler(async(req, res) => {
 
     const { id } = req.params;
-    const { status } = queueValidator.queueStatusValid.parse(req.body);
+    const { status } = queueValidator.queueStatusValid.parse({status: req.body.newState});
     const queue = await queueServices.modifyQueueStatus(Number(id), status);
     res.status(200).json({
         success: true,
